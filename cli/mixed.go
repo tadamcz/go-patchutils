@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/golang/glog"
 	"github.com/google/go-patchutils"
 	"github.com/google/subcommands"
 )
@@ -41,28 +40,28 @@ func (c *mixedCmd) SetFlags(f *flag.FlagSet) {
 
 func (c *mixedCmd) Execute(_ context.Context, f *flag.FlagSet, _ ...interface{}) subcommands.ExitStatus {
 	if (c.oldSource == "") || (c.oldDiff == "") || (c.newSource == "") || (c.newDiff == "") {
-		glog.Errorf("Error: necessary flags aren't assigned")
-		glog.Infof("Usage: %s %s", os.Args[0], c.Usage())
+		fmt.Fprintln(os.Stderr, "Error: necessary flags aren't assigned")
+		fmt.Fprintf(os.Stderr, "Usage: %s %s", os.Args[0], c.Usage())
 		return subcommands.ExitUsageError
 	}
 
 	oldD, err := os.Open(c.oldDiff)
 	if err != nil {
-		glog.Errorf("Failed to open oldDiffFile %q\n", c.oldDiff)
+		fmt.Fprintf(os.Stderr, "Failed to open oldDiffFile %q\n", c.oldDiff)
 		return subcommands.ExitFailure
 	}
 	defer oldD.Close()
 
 	newD, err := os.Open(c.newDiff)
 	if err != nil {
-		glog.Errorf("Failed to open newDiffFile %q\n", c.newDiff)
+		fmt.Fprintf(os.Stderr, "Failed to open newDiffFile %q\n", c.newDiff)
 		return subcommands.ExitFailure
 	}
 	defer newD.Close()
 
 	result, err := patchutils.MixedModePath(c.oldSource, c.newSource, oldD, newD)
 	if err != nil {
-		glog.Errorf("Error during computing diff for (%q + %q) and (%q + %q): %v\n",
+		fmt.Fprintf(os.Stderr, "Error during computing diff for (%q + %q) and (%q + %q): %v\n",
 			c.oldSource, c.oldDiff, c.newSource, c.newDiff, err)
 		return subcommands.ExitFailure
 	}

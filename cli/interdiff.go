@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/golang/glog"
 	"github.com/google/go-patchutils"
 	"github.com/google/subcommands"
 )
@@ -37,28 +36,28 @@ func (c *interdiffCmd) SetFlags(f *flag.FlagSet) {
 
 func (c *interdiffCmd) Execute(_ context.Context, f *flag.FlagSet, _ ...interface{}) subcommands.ExitStatus {
 	if (c.oldDiff == "") || (c.newDiff == "") {
-		glog.Error("Error: necessary flags aren't assigned")
-		glog.Infof("Usage: %s %s", os.Args[0], c.Usage())
+		fmt.Fprintln(os.Stderr, "Error: necessary flags aren't assigned")
+		fmt.Fprintf(os.Stderr, "Usage: %s %s", os.Args[0], c.Usage())
 		return subcommands.ExitUsageError
 	}
 
 	oldD, err := os.Open(c.oldDiff)
 	if err != nil {
-		glog.Errorf("Failed to open oldDiffFile: %q\n", c.oldDiff)
+		fmt.Fprintf(os.Stderr, "Failed to open oldDiffFile: %q\n", c.oldDiff)
 		return subcommands.ExitFailure
 	}
 	defer oldD.Close()
 
 	newD, err := os.Open(c.newDiff)
 	if err != nil {
-		glog.Errorf("Failed to open newDiffFile %q\n", c.newDiff)
+		fmt.Fprintf(os.Stderr, "Failed to open newDiffFile %q\n", c.newDiff)
 		return subcommands.ExitFailure
 	}
 	defer newD.Close()
 
 	result, err := patchutils.InterDiff(oldD, newD)
 	if err != nil {
-		glog.Errorf("Error during computing diff for %q and %q: %v\n", c.oldDiff, c.newDiff, err)
+		fmt.Fprintf(os.Stderr, "Error during computing diff for %q and %q: %v\n", c.oldDiff, c.newDiff, err)
 		return subcommands.ExitFailure
 	}
 
